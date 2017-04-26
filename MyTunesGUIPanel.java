@@ -4,7 +4,10 @@ import java.awt.Font;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.GridLayout;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.io.File;
+import java.text.DecimalFormat;
 
 import javax.swing.BorderFactory;
 import javax.swing.BoxLayout;
@@ -26,16 +29,24 @@ import javax.swing.event.ListSelectionListener;
 @SuppressWarnings("serial")
 public class MyTunesGUIPanel extends JPanel
 {
-	//TODO: Btw you can totes have instance variables here for things like the current playlist, etc.
-	//TODO: jlist's list, the playlist object "selected playlist", current song index (?), 2d buttons array for heatmap,
-	//		color changing thing (what will it be?)
+	final String pattern = "###,###.##";
+	final DecimalFormat DFORMAT = new DecimalFormat(pattern);
 	
-	//TODO: Put all buttons and components up here so we can change them within other methods
-	JList<Song> playlistList;
-	PlayList playlist; //TODO: Update if you change the playlist(do we need this fuction for the project?)
+	ImageIcon //sets up icons we use
+	prevIcon = new ImageIcon("images/media-skip-backward-48.gif"),
+	playIcon = new ImageIcon("images/play-48.gif"),
+	stopIcon = new ImageIcon("images/stop-48.gif"),
+	nextIcon = new ImageIcon("images/media-skip-forward-48.gif");
+	
+	PlayList playlist;
+	JList<Song> playlistJList;
 	JButton[][] heatmap;
 	Song[] songs;
 	JLabel nowPlayingLabel;
+	String numSongsString,timeInMinutesString;
+	JButton songUpButton,songDownButton,addSongButton,removeSongButton,nextSongButton,prevSongButton,playStopSongButton;
+	
+
 	
 	/**
 	 * Main constructor. This will set up the main panel frame to be used in MyTunesGUI.java.
@@ -44,7 +55,7 @@ public class MyTunesGUIPanel extends JPanel
 	{
 		playlist = new PlayList("Project 5 Mixtape");
 		playlist.loadFromFile(new File("playlist.txt"));
-		
+		ButtonListener buttonListener = new ButtonListener();
 		BorderLayout mainLayout = new BorderLayout();
 		mainLayout.setHgap(10); 
 		setLayout(mainLayout); 
@@ -54,12 +65,11 @@ public class MyTunesGUIPanel extends JPanel
 		leftSide.setLayout(new BoxLayout(leftSide,BoxLayout.Y_AXIS));
 		leftSide.setPreferredSize(new Dimension(600,0));
 		
-		//play list label panel //TODO: Fix the spacing here
 		JPanel playlistLablePanel = new JPanel();
 		playlistLablePanel.setLayout(new GridBagLayout());
 		GridBagConstraints c = new GridBagConstraints();
 		
-		JLabel playlistNameLabel = new JLabel(playlist.getName()); //Displays the loaded playlist's name TODO: replace with proper content
+		JLabel playlistNameLabel = new JLabel(playlist.getName()); //Displays the loaded playlist's name
 		playlistNameLabel.setFont(new Font(playlistNameLabel.getFont().getFontName(),Font.ITALIC,35)); 
 		c.gridx = 0;
 		c.gridy = 0;
@@ -67,8 +77,8 @@ public class MyTunesGUIPanel extends JPanel
 		c.ipadx = 20;
 		playlistLablePanel.add(playlistNameLabel,c);
 		
-		String numSongs = new String(playlist.getNumSongs()+" songs"); //TODO: Update when adding/removing songs, make instanced
-		JLabel playlistSongCountLabel = new JLabel(numSongs); //Displays the loaded playlist's song count TODO: replace with proper content
+		numSongsString = new String(playlist.getNumSongs()+" songs"); 
+		JLabel playlistSongCountLabel = new JLabel(numSongsString); //Displays the loaded playlist's song count
 		playlistSongCountLabel.setFont(new Font(playlistSongCountLabel.getFont().getFontName(),Font.PLAIN,15));
 		c.gridx = 0;
 		c.gridy = 1;
@@ -82,9 +92,9 @@ public class MyTunesGUIPanel extends JPanel
 		c.gridy = 1;
 		playlistSpacingLabel.setAlignmentX(CENTER_ALIGNMENT);
 		playlistLablePanel.add(playlistSpacingLabel,c);
-		
-		String totalTime = new String(playlist.getTotalPlayTime()+" minutes"); //TODO: Update when adding/removing songs, make instanced
-		JLabel playlistTimeLabel = new JLabel(totalTime); //Displays the loaded playlist's time TODO: replace with proper content; mm.(%remaining minute)
+		//playlist.getTotalPlayTimeInMinutes()
+		timeInMinutesString = new String(DFORMAT.format(playlist.getTotalPlayTimeInMinutes())+" minutes"); //TODO: Update when adding/removing songs, make instanced
+		JLabel playlistTimeLabel = new JLabel(timeInMinutesString); //Displays the loaded playlist's time
 		playlistTimeLabel.setFont(new Font(playlistTimeLabel.getFont().getFontName(),Font.PLAIN,15));
 		c.gridx = 2;
 		c.gridy = 1;
@@ -101,21 +111,26 @@ public class MyTunesGUIPanel extends JPanel
 		
 		
 		//JList showing the songs in the play list
-		playlistList = new JList<Song>(playlist.getSongArray());
-		playlistList.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
-		playlistList.setFont(new Font("monospaced", Font.PLAIN,12));
-		playlistList.addListSelectionListener(new PlaylistListListener());
-		JScrollPane playlistScrollPane = new JScrollPane(playlistList); 
+		playlistJList = new JList<Song>(playlist.getSongArray());
+		playlistJList.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
+		playlistJList.setFont(new Font("monospaced", Font.PLAIN,12));
+		playlistJList.addListSelectionListener(new PlaylistListListener());
+		JScrollPane playlistScrollPane = new JScrollPane(playlistJList); 
 		playlistScrollPane.getVerticalScrollBar().setUnitIncrement(16);
 		playlistControlPanel.add(playlistScrollPane); 
 		
+		System.out.println("Debug selected initial index: " + playlistJList.getSelectedIndex());
 		
 		JPanel playlistControlButtonPanel = new JPanel();
 		playlistControlButtonPanel.setLayout(new BoxLayout(playlistControlButtonPanel,BoxLayout.X_AXIS));
-		JButton songUpButton = new JButton("^");
-		JButton songDownButton = new JButton("V");
-		JButton addSongButton = new JButton("add song");
-		JButton removeSongButton = new JButton("remove song");
+		songUpButton = new JButton(new ImageIcon("images/move-up-16.gif"));
+		songUpButton.addActionListener(buttonListener);
+		songDownButton = new JButton(new ImageIcon("images/move-down-16.gif"));
+		songDownButton.addActionListener(buttonListener);
+		addSongButton = new JButton("add song");
+		addSongButton.addActionListener(buttonListener);
+		removeSongButton = new JButton("remove song");
+		removeSongButton.addActionListener(buttonListener);
 		
 		playlistControlButtonPanel.add(songUpButton);
 		playlistControlButtonPanel.add(songDownButton);
@@ -144,7 +159,7 @@ public class MyTunesGUIPanel extends JPanel
 			for (int col = 0;col<heatmap.length;col++)
 			{
 				JButton heatmapButton = new JButton("TestHM"+(row+1));
-				//heatmapButton.setPreferredSize(new Dimension(10,10));//TODO: Get buttons to be square?
+				//heatmapButton.setPreferredSize(new Dimension(10,10));//TODO: Get buttons to be square? 
 				heatmapPanel.add(heatmapButton);
 			}
 		}
@@ -163,9 +178,14 @@ public class MyTunesGUIPanel extends JPanel
 		
 		
 		JPanel songControlButtonPanel = new JPanel(); //playing songs button panel
-		JButton prevSongButton = new JButton(new ImageIcon("images/media-skip-backward-48.gif"));
-		JButton playStopSongButton = new JButton(new ImageIcon("images/play-48.gif"));
-		JButton nextSongButton = new JButton(new ImageIcon("images/media-skip-forward-48.gif"));
+		prevSongButton = new JButton(prevIcon);
+		prevSongButton.addActionListener(buttonListener);
+		prevSongButton.setEnabled(false);
+		playStopSongButton = new JButton(playIcon);
+		playStopSongButton.addActionListener(buttonListener);
+		nextSongButton = new JButton(nextIcon);
+		nextSongButton.addActionListener(buttonListener);
+		nextSongButton.setEnabled(false);
 		
 		songControlButtonPanel.add(prevSongButton);
 		
@@ -188,14 +208,141 @@ public class MyTunesGUIPanel extends JPanel
 	 * 
 	 * @author Dominick Edmonds
 	 */
-	private void updatePlayingSong() //TODO: Doesn't update song on list seleciton, only when a heatmap button is pressed or the play button is selected.
+	private void updatePlayingSong() //TODO: Timer, start just after the  .playSong bit. Calls for the song to stop once it fires
 	{
-			playlist.playSong(playlistList.getSelectedIndex());
-			nowPlayingLabel.setText((playlist.getPlaying().getTitle() +" by "+ playlist.getPlaying().getArtist()));
+		playlist.getPlaying().stop();
+		playlist.playSong(playlistJList.getSelectedIndex());
+		playStopSongButton.setIcon(stopIcon);
+		nowPlayingLabel.setText("\""+playlist.getPlaying().getTitle() +"\" by "+ playlist.getPlaying().getArtist());
+		nextSongButton.setEnabled(true);
+		prevSongButton.setEnabled(true);
+		System.out.println("DEBUG PLAYS: " + playlist.getPlaying().getPlayCount()); //TODO: Replace me with heat map color changing
 	}
 	
+	/**
+	 * Used to refresh the playlist JList if either a song is added, removed, or moved.
+	 * It will also update the heatmap buttons, ensuring everything is in order TODO finish me
+	 * Additionally, it will check to see if the length of the heatmap's sides can be changed. TODO finish me
+	 */
+	private void syncPlaylistJList()
+	{
+		playlistJList.setListData(playlist.getSongArray());
+	}
 	
-	//TODO: Event handlers: Buttons: soungUP,songDOWN,nextSong,prevSong,addSong,removeSong,playSong/stopSong,heatmapButtons(ID'd by the song object in the associated jlist(?))
+	/**
+	 * Updates total time and number of songs labels when adding/removing songs to the play list.
+	 * 
+	 * TODO Finishe me boii
+	 */
+	private void syncPlaylistStatLables() //TODO You are here
+	{
+		
+	}
+	
+	/**
+	 * This listener is specifically for the heat map section
+	 */
+	
+	/**
+	 * This listener will listen for all the buttons on the panel, preforming actions accordingly.
+	 * 
+	 * @author Dominick Edmonds
+	 */														//TODO: Look at lab 11/12 to see how to get heatmap[][] buttons to work
+	private class ButtonListener implements ActionListener  //TODO: Maybe use eventActionCommands and add additional button functionality, like pressing kbd spacebar will do the same a play/pause button
+	{
+		@Override
+		public void actionPerformed(ActionEvent e) 
+		{
+			if (e.getSource() == songUpButton) //Moves the song UP one in the list, as in -1 in the array refreshes the JList
+			{
+				System.out.println("songUp: " +playlistJList.getSelectedIndex() +" to " + (playlistJList.getSelectedIndex()-1));
+				int targetIndex = playlist.moveUp(playlistJList.getSelectedIndex());
+				syncPlaylistJList();
+				playlistJList.setSelectedIndex(targetIndex);
+			}
+			
+			if (e.getSource() == songDownButton) //Moves the song DOWN one in the list, as in +1 in the array, refreshes the JList TODO See lab 11/12
+			{
+				System.out.println("songDown: "+playlistJList.getSelectedIndex()+" to " + (playlistJList.getSelectedIndex()+1));
+				int targetIndex = playlist.moveDown(playlistJList.getSelectedIndex());
+				syncPlaylistJList();
+				playlistJList.setSelectedIndex(targetIndex);
+			}
+			
+			if (e.getSource() == addSongButton) //opens a file browser and ADDS a new song to the list at the end, refreshes the jlist
+			{
+				System.out.println("addSong");
+				//add song
+				//refresh jlist
+				//refresh playstat labels
+				//refresh heatmap
+			}
+			
+			if (e.getSource() == removeSongButton) //opens a dialogue confirmation box, "yes" will delete the currently selected song. Refreshes the jlist
+			{
+				System.out.println("removeSong");
+				//remove song
+				//refresh jlist
+				//refresh playstat labels
+				//refresh heatmap
+			}
+			
+			if (e.getSource() == nextSongButton) //takes the selected jlist item and goes to the NEXT song, looping if at either end, going to index 0 if none are selected, and begins to play the new song.
+			{
+				int index = playlistJList.getSelectedIndex();
+				System.out.println("nextSong");
+				index++;
+				if (index > playlist.getSongArray().length-1)
+				{
+					index = 0;
+				}
+				
+				playlistJList.setSelectedIndex(index);
+				updatePlayingSong();
+			}
+			
+			if (e.getSource() == prevSongButton) //takes the selected jlist item and goes to the PREVIOUS song, looping if at either end, going to index 0 if none are selected, and begins to play the new song.
+			{
+				int index = playlistJList.getSelectedIndex();
+				System.out.println("prevSong");
+				index--;
+				if (index < 0)
+				{
+					index = playlist.getSongArray().length-1;
+				}
+				
+				playlistJList.setSelectedIndex(index);
+				updatePlayingSong();
+			
+			}
+			
+			if (e.getSource() == playStopSongButton) //plays/stops the selected song. Will alternate between the two depending on if a song is playing or not
+			{
+				if (playlist.getPlaying().getPlayTime() == 0)
+				{
+					System.out.println("play");
+					if (playlistJList.getSelectedIndex() > -1)
+					{
+						updatePlayingSong();
+					}
+					else
+					{
+						System.err.println("cannot play; no song is selected");
+					}
+				}
+				else
+				{
+					System.out.println("stop"); //TODO: Stop the timer as well
+					playlist.stop();
+					nowPlayingLabel.setText("\""+playlist.getPlaying().getTitle() +"\" by "+ playlist.getPlaying().getArtist());
+					playStopSongButton.setIcon(playIcon);
+				}
+				
+			}
+			
+		}
+		
+	}
 	
 	/**
 	 * This method will react to the playlistList JList. Selecting a song changes the current playing song to the selection,
@@ -203,15 +350,15 @@ public class MyTunesGUIPanel extends JPanel
 	 * 
 	 * @author Dominick Edmonds
 	 */
-	private class PlaylistListListener implements ListSelectionListener 
+	private class PlaylistListListener implements ListSelectionListener //TODO: What the fuck is this even for anymore? IS GOD DEAD? IF YES HE'S IN THIS METHOD
 	{
 		@Override
 		public void valueChanged(ListSelectionEvent e) //TODO: Copy list looping functionality (index 0 -> last, last -> 0, like you're going in a loop around the list) from labs 11 & 12's jlist
 		{
 			if (e.getValueIsAdjusting()==false)
 			{
-				/*if (e.getSource().isSelectionEmpty==false)*/ //TODO: Solve deselecting jlist item issue, either by disabling deselection functionality, or by a boolean that uses "nothing by nobody" if the item is deselected
-				updatePlayingSong();
+				/*if (e.getSource().isSelectionEmpty==false)*/ //TODO: Solve de-selecting JList item issue, either by disabling deselection functionality, or by a boolean that uses "nothing by nobody" if the item is deselected
+				//updatePlayingSong();
 			}
 			
 		}

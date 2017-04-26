@@ -12,7 +12,7 @@ import java.util.Scanner;
 
 public class PlayList implements MyTunesPlayListInterface
 {
-
+	private final Song NOSONG = new Song("Nothing","Nobody",0,"Nowhere"); //for when no other song is selected
 	private ArrayList<Song> songList;
 	private String playlistName; // name of the play list
 	private Song playing; //The song that is currently playing
@@ -56,7 +56,7 @@ public class PlayList implements MyTunesPlayListInterface
 		}
 		else
 		{
-			Song nothing = new Song("Nothing","Nobody",0,"Nowhere");
+			Song nothing = NOSONG;
 			return nothing;
 		}
 	}
@@ -88,11 +88,11 @@ public class PlayList implements MyTunesPlayListInterface
 	public void addSong(Song newSong)
 	{
 		this.songList.add(newSong);
-		this.sortList(); //TODO: Do we want this still?
 	}
 	
+	
 	@Override
-	public void loadFromFile(File file) // called when an file item is selected with "add new song" button's file chooser dialogue, and the user inputs proper information into the song creation dialogue box
+	public void loadFromFile(File file) // called when creating a new playlist
 	{
 		try {
 			Scanner scan = new Scanner(file);
@@ -123,7 +123,7 @@ public class PlayList implements MyTunesPlayListInterface
 	*@param index The index of the song desired for removal
 	*@return the song to be removed- null if invalid
 	*/
-	public Song removeSong(int index)
+	public Song removeSong(int index) //TODO: Consider a dialogue confirmation box. Also, consider an error dialogue box if there's no song to remove
 	{
 		Song toRemove = null;
 		if (index < this.getNumSongs() && index >= 0)
@@ -163,7 +163,7 @@ public class PlayList implements MyTunesPlayListInterface
 	 * Gets the total play time in seconds of the play list
 	 * and returns the value.
 	 * 
-	 * @return The total time of all songs in the play list
+	 * @return totalTime The total time of all songs in the play list
 	 */
 	public int getTotalPlayTime()
 	{
@@ -172,6 +172,21 @@ public class PlayList implements MyTunesPlayListInterface
 		{
 			totalTime += song.getPlayTime();
 		}
+		return totalTime;
+	}
+	
+	/**
+	 * 
+	 * @return totalTime the total time in minutes
+	 */
+	public double getTotalPlayTimeInMinutes()
+	{
+		double totalTime = 0;
+		for (Song song : this.songList)
+		{
+			totalTime += song.getPlayTime();
+		}
+		totalTime = totalTime/60;
 		return totalTime;
 	}
 	
@@ -185,11 +200,12 @@ public class PlayList implements MyTunesPlayListInterface
 		if (index <= this.songList.size() && index >= 0)
 		{
 			Song theSong = this.songList.get(index);
+			theSong.play();
 			this.playing = theSong;
 		}
 		else
 		{
-			//does nothing, or throws an exception
+			//does nothing, or throws an exception?
 		}
 	}
 	
@@ -198,10 +214,21 @@ public class PlayList implements MyTunesPlayListInterface
 	{
 		if (this.songList.contains(song))
 		{
+			song.play();
 			this.playing = song;
-		}
-		
+		}	
 	}
+	
+	@Override
+	public void stop() 
+	{
+		if(playing != null)
+		{
+			playing.stop();
+			playing = null;	
+		}
+	}
+
 	
 	/**
 	 * Returns a formated string of info about each song in the playlist,
@@ -222,7 +249,7 @@ public class PlayList implements MyTunesPlayListInterface
 				Song shortest = this.songList.get(0);
 				double avgPlayTime = (double)this.getTotalPlayTime()/ this.songList.size();
 				
-				theInfo  = String.format("The average play time is: "+"%.2f"+" seconds\n", avgPlayTime); // TODO: Decimal format?
+				theInfo  = String.format("The average play time is: "+"%.2f"+" seconds\n", avgPlayTime);
 				theInfo += String.format("The shortest song is: "+"%s\n",shortest.toString());
 				theInfo += String.format("The longest song is: "+"%s\n",longest.toString());
 				theInfo += String.format("Total play time: "+"%d seconds\n", this.getTotalPlayTime());
@@ -292,13 +319,6 @@ public class PlayList implements MyTunesPlayListInterface
 		}
 	}
 
-
-	@Override
-	public void stop() 
-	{
-		playing = null;	
-	}
-
 	@Override
 	public Song[] getSongArray() 
 	{
@@ -315,15 +335,57 @@ public class PlayList implements MyTunesPlayListInterface
 	@Override
 	public int moveUp(int index) 
 	{
-		// TODO Auto-generated method stub
+		Song[] temp;
+		
+		if (index==0) //when you're at the top of the list already, "up" will set the last item in the array to the chosen index
+		{
+			temp = this.getSongArray();
+			temp[songList.size()-1] = songList.get(index);
+			temp[index] = songList.get(songList.size()-1);
+			index = songList.size()-1;
+		}
+		else // anywhere else in the list
+		{
+			temp = this.getSongArray();
+			temp[index-1] = songList.get(index);
+			temp[index] = songList.get(index-1);
+			index = index-1;
+		}
+		
+		for (int i = 0; i<songList.size();i++)
+		{
+			songList.set(i, temp[i]);
+		}
+		
 		return index;
 	}
 
 	@Override
 	public int moveDown(int index) 
 	{
-		// TODO Auto-generated method stub
-		return index;
+		Song[] temp;
+		
+		if(index == songList.size()-1) //for when the index is already the last; loops it around to the front
+		{
+			temp = this.getSongArray();
+			temp[0] = songList.get(index);
+			temp[index] = songList.get(0);
+			index = 0;
+		}
+		else //anywhere else in the list
+		{
+			temp = this.getSongArray();
+			temp[index+1] = songList.get(index);
+			temp[index] = songList.get(index+1);
+			index = index+1;
+		}
+		
+		for (int i = 0; i<songList.size();i++)
+		{
+			songList.set(i, temp[i]);
+		}
+		
+		return index; 
 	}
 
 	@Override

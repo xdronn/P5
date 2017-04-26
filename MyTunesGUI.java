@@ -18,12 +18,9 @@ public class MyTunesGUI
 	public static void main(String args[])
 	{
 		// So it looks consistent on Mac/Windows/Linux
-		try 
-		{
+		try {
 			UIManager.setLookAndFeel(UIManager.getCrossPlatformLookAndFeelClassName());
-		} 
-		catch (Exception e) 
-		{
+		} catch (Exception e) {
 			e.printStackTrace();
 		}
 
@@ -33,6 +30,5 @@ public class MyTunesGUI
 		frame.setPreferredSize(new Dimension(1200, 650));
 		frame.pack();
 		frame.setVisible(true);
-		frame.setLocationRelativeTo(null); //centers frame on screen
 	}
 }

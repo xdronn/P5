@@ -22,14 +22,15 @@ import java.net.URL;
 public class Song
 {
 	// Used to play the song.
-	private AudioClip clip;
+	private AudioClip clip; //TODO; mak this work boii
 
 	private String title;
 	private String artist;
 	private int playTime; // in seconds
 	private String filePath;
-	private int playCount;
-
+	private int playCount; //Times the song's been played TODO integrate into heatmap
+	
+	
 	/**
 	 * Constructor: Builds a song using the given parameters.
 	 * @param title song's title
@@ -76,7 +77,7 @@ public class Song
 	
 	/**
 	 * Sets the play time of this <code>Song</code>.
-	 * @param playTime song's artist to be set
+	 * @param playTime song's play time to be set in seconds
 	 */
 	public void setPlayTime(int playTime)
 	{
@@ -122,7 +123,7 @@ public class Song
 	{
 		if (artist == null)
 		{
-			String noArtist= new String("Nobody");
+			String noArtist= new String("Nobody"); //TODO: Fix the associate null errors for when a song isn't playing
 			return noArtist;
 		}
 		else
@@ -140,6 +141,8 @@ public class Song
 	{
 		return playTime;
 	}
+	
+	//TODO Another play time get method that converts it to a minute double (1min 30sec == 1.5 minutes)
 
 	/**
 	 * Returns the file path of this <code>Song</code>.
