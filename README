@@ -6,55 +6,78 @@
 
 ## Overview
 
-Concisely explain what the program does. If this exceeds a couple of
-sentences, you're going too far. Generally you should be pulling this
-right from the project specification. I don't want you to just cut and
-paste, but paraphrase what is stated in the project specification.
+The MyTunes program will open up a GUI window, loading an intial playlist provided by the
+source files. From there, the user is free to add and remove songs, play songs, and gawk
+at the glory of the HeatMap button grid on the right side of the program.
 
 ## Compiling and Using
 
-This section should tell the user how to compile your code.  It is
-also appropriate to instruct the user how to use your code. Does your
-program require user input? If so, what does your user need to know
-about it to use it as quickly as possible?
+In order to compile the program, simply open up the MyTunesGUI.java file in Eclipse, and
+click the green "run" button up top.
+
+Note, in order for the program to work properly, the images file, the sounds file, and
+playlist.txt as well as the other java file must be present in the workspace.
+
+The program will have many buttons, many of which are familiar if you've ever used ITunes or
+Spotify. The less common buttons have tooltips if the user gets confused. Additionally, when
+adding a song, the user is expected to select an audio file in the file browser, and then
+type in a title and an artist. Additionally, they must use the two combo boxes to select
+minutes and seconds.
 
 ## Discussion
 
-Discuss the issues and successes you encountered during programming
-(development). Here are some questions to get you started. You don't
-have to answer all of them in order - they are a guideline to get you
-thinking.
   * What problems did you have? What went well?
+  I ran into a lot of problems with the dialogue box, speifically validating the information used when a user adds a
+  new song. I probably spent the most time on that, honestly. My fix was to check if the artist and title were empty,
+  and in either case create my own runtime exception that would be thrown and caught within a while loop, which ment that
+  so long as there was either no artist or song title entered, or a time greater than 0 seconds, the dialogue window would
+  remain open. Only once everything was in order would the program allow the user to finally add the song.
+  
+  As for something that went well, I was afraid that I would have a lot of problems with both the heatmap and the timer,
+  especially since most of the classmates I spoke with had issues with those things exactly. I'm proud to say that 
+  they probably were the easiest parts of this project, thanks to examining and repurposing code I wrote in previous
+  labs and projects. The timer came to me more naturally than I thought, all it took was an additional seconds to ms
+  method in the song class.
+  
   * What process did you go through to create the program?
-  * What did you have to research and learn on your own?
-  * What kinds of errors did you get? How did you fix them?
-  * What parts of the project did you find challenging?
-  * Is there anything that finally "clicked" for you in the process 
-  of working on this project?
+  I talk about it a little more in the testing section, but my development was pretty much broken into two main parts-
+  the GUI design, and the functionality. Design focused entirely on aesthetics, and getting things to look correct, and
+  fuctionality was all the method writing, the event handling, and all that good stuff.
+  
   * Is there anything that you would change about the project?
+  If I was to change anything, I'd probably add the ability to add multiple songs at once, using the file names themselves
+  as song names, requiring only an aritst and playtime. I'd also add an "add playlist" button, that would create a new tab
+  at the highest level of the GUIPanel class, so you could tab between several unique playlists.
+  
   * Can you apply what you learned in this project to future projects?
+  All of it!!! There's a lot I learned, about not only java syntax, but about time management, larger scale project production,
+  GUI design and theory, and loads more. This project, more than any other, has really opened my eyes to what can be done.
+  I can imagine what kinds of things I'll be able to do after just a few more years!
 
 ## Testing
 
-In this section, tell us how you tested your project.
+I had two main phases of development. First, I added the GUI bit by bit, opening the program offten.
+I used a lot of dummy components, for example my heatmap was a static 5x5 grid of jbuttons with nothing
+special about them, minus the fact they were there.
 
-You are expected to test your projects before submitting them for
-final review. Pretend that your instructor is your manager or 
-customer at work. How would you ensure that you are delivering a 
-working solution to their requirements?
-
-## Extra Credit
-
-If the project had opportunities for extra credit that you attempted,
-be sure to call it out so the grader does not overlook it.
+Once everything was in place, I hooked up all the buttons to listeners that would echo println() statements
+in the console, to ensure they were working. I then started adding functionality, opening the program and
+toying around with whatever I was working on at the time extensively, looking for odd situations,
+one example of that would be when you remove the last item in the playlist, how should the heatmap react?
+Initially it gave errors, but I eventually found a solution that not only eliminated the error, but also 
+went above what the provided .JAR example did- the JAR would resize all of the right half of the UI when
+the heatmap was gone, mine simply keeps it's shape but shows no more buttons there.
 
 ## Sources used
 
-If you used any sources outside of the lecture notes, class lab files,
-or text book you need to list them here. If you looked something up on
-stackoverflow.com and fail to cite it in this section it will be
-considered plagiarism and be dealt with accordingly. So be safe CITE!
-[Here is some help creating links](https://github.com/adam-p/markdown-here/wiki/Markdown-Cheatsheet#links)
+Beyond the book, lectures, labs, provided example documents for the course, and my previous projects, I spent a
+fair ammount of time reading up on the javadocs and oracle's official tutorials on how to use paticular
+components, especially the dialogue boxes.
+
+I also discussed general psuedo code with my classmates, but nothing specific enough that I could just type it in.
+
+Additionally, the methods provided for me included the color changing one for the heatmap, the play and stop audio
+clip methods, and a few others documented in the javadocs within the program's source code.
 
 ----------
 This README template is using Markdown. To preview your README output, you can copy your file contents to a Markdown 
