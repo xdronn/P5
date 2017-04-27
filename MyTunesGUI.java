@@ -5,6 +5,7 @@ import javax.swing.UIManager;
 
 /**
  * The driver class for MyTunes GUI.
+ * Sets up the frame and imports a MyTunesGUIPanel to fill it's main content pane.
  * 
  * @author CS121 Instructors
  * @version Spring 2017

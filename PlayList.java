@@ -123,7 +123,7 @@ public class PlayList implements MyTunesPlayListInterface
 	*@param index The index of the song desired for removal
 	*@return the song to be removed- null if invalid
 	*/
-	public Song removeSong(int index) //TODO: Consider a dialogue confirmation box. Also, consider an error dialogue box if there's no song to remove
+	public Song removeSong(int index)
 	{
 		Song toRemove = null;
 		if (index < this.getNumSongs() && index >= 0)
@@ -176,7 +176,8 @@ public class PlayList implements MyTunesPlayListInterface
 	}
 	
 	/**
-	 * 
+	 * This will take the time in seconds provided by the song, and return it as minutes. Not as mm:ss,
+	 * but as (for example) 90 seconds will return 1.5 minutes; not 1minute 30seconds.
 	 * @return totalTime the total time in minutes
 	 */
 	public double getTotalPlayTimeInMinutes()
@@ -191,7 +192,8 @@ public class PlayList implements MyTunesPlayListInterface
 	}
 	
 	/**
-	 * Plays the song at the selected index
+	 * Plays the song at the selected index.
+	 * If there isn't an index to play, it will do nothing.
 	 * 
 	 * @param index Index of the song desired to play
 	 */
@@ -203,11 +205,8 @@ public class PlayList implements MyTunesPlayListInterface
 			theSong.play();
 			this.playing = theSong;
 		}
-		else
-		{
-			//does nothing, or throws an exception?
-		}
 	}
+	
 	
 	@Override
 	public void playSong(Song song) 
@@ -218,6 +217,7 @@ public class PlayList implements MyTunesPlayListInterface
 			this.playing = song;
 		}	
 	}
+	
 	
 	@Override
 	public void stop() 

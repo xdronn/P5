@@ -123,7 +123,7 @@ public class Song
 	{
 		if (artist == null)
 		{
-			String noArtist= new String("Nobody"); //TODO: Fix the associate null errors for when a song isn't playing
+			String noArtist= new String("Nobody");
 			return noArtist;
 		}
 		else
@@ -142,7 +142,15 @@ public class Song
 		return playTime;
 	}
 	
-	//TODO Another play time get method that converts it to a minute double (1min 30sec == 1.5 minutes)
+	/**
+	 * Returns the play time of this <code>Song</code> in miliseconds.
+	 * @return the playTime
+	 */
+	public int getPlayTimeMS()
+	{
+		int playTimeMS = playTime*1000;
+		return playTimeMS;
+	}
 
 	/**
 	 * Returns the file path of this <code>Song</code>.
