@@ -391,8 +391,24 @@ public class PlayList implements MyTunesPlayListInterface
 	@Override
 	public Song[][] getSongSquare() 
 	{
-		//TODO: SEE LAB11 AND LAB12, LOOK AT PHOTO SQUARE
-		return null;
+		int index = 0;
+		int dimentions = (int) Math.ceil(Math.sqrt(this.songList.size()));
+		
+		Song[][] songSquare = new Song[dimentions][dimentions];	
+		
+		for (int row=0;row<songSquare.length;row++) //row
+		{
+			for(int col=0;col<songSquare[row].length;col++) //column
+			{
+				if (index > this.songList.size()-1)
+				{
+					index = 0;
+				}
+				songSquare[row][col] = this.songList.get(index);
+				index++;
+			}
+		}
+		return  songSquare;
 	}
 	
 	

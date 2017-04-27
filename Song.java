@@ -22,13 +22,13 @@ import java.net.URL;
 public class Song
 {
 	// Used to play the song.
-	private AudioClip clip; //TODO; mak this work boii
+	private AudioClip clip;
 
 	private String title;
 	private String artist;
 	private int playTime; // in seconds
 	private String filePath;
-	private int playCount; //Times the song's been played TODO integrate into heatmap
+	private int playCount; //Times the song's been played
 	
 	
 	/**
@@ -167,6 +167,7 @@ public class Song
 	 */
 	public void play()
 	{
+		this.stop(); //stops any currently playing song
 		if(clip != null) {
 			clip.play();
 			playCount++;
